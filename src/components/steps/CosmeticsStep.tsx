@@ -16,7 +16,11 @@ export function CosmeticsStep() {
         setSelectedCosmeticCategory,
         getPersonalColorName,
         setStep,
+        recommendedProducts,
     } = useApp();
+
+    // API로 받은 제품이 있으면 사용, 없으면 mock 데이터 사용
+    const hasApiProducts = recommendedProducts.length > 0;
 
     return (
         <>
@@ -35,9 +39,11 @@ export function CosmeticsStep() {
                         <p className="text-sm">{cosmeticPreferences}</p>
                     </div>
                 )}
-                <p className="mt-2 text-sm text-muted-foreground">
-                    카테고리를 선택해서 제품을 확인해보세요!
-                </p>
+                {!hasApiProducts && (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        카테고리를 선택해서 제품을 확인해보세요!
+                    </p>
+                )}
             </ChatMessage>
 
             <motion.div
@@ -46,25 +52,40 @@ export function CosmeticsStep() {
                 transition={{ delay: 0.4 }}
                 className="space-y-4"
             >
-                <CategoryFilter
-                    categories={['베이스', '아이', '치크', '립']}
-                    selectedCategory={selectedCosmeticCategory}
-                    onSelectCategory={setSelectedCosmeticCategory}
-                />
+                {!hasApiProducts && (
+                    <CategoryFilter
+                        categories={['베이스', '아이', '치크', '립']}
+                        selectedCategory={selectedCosmeticCategory}
+                        onSelectCategory={setSelectedCosmeticCategory}
+                    />
+                )}
                 <div className="grid grid-cols-2 gap-4">
-                    {mockCosmetics
-                        .filter((product) => product.category === selectedCosmeticCategory)
-                        .map((product, index) => (
+                    {hasApiProducts
+                        ? recommendedProducts.map((product, index) => (
                             <ProductCard
-                                key={index}
-                                name={product.name}
+                                key={product.id || index}
+                                name={`${product.name} ${product.option_name || ''}`.trim()}
                                 brand={product.brand}
-                                category={product.category}
-                                imageUrl={product.imageUrl}
-                                description={product.description}
+                                imageUrl={product.img_url}
+                                description={product.reason || ''}
+                                price={product.price_str}
+                                productUrl={product.product_url}
                                 delay={0.1 + index * 0.1}
                             />
-                        ))}
+                        ))
+                        : mockCosmetics
+                            .filter((product) => product.category === selectedCosmeticCategory)
+                            .map((product, index) => (
+                                <ProductCard
+                                    key={index}
+                                    name={product.name}
+                                    brand={product.brand}
+                                    category={product.category}
+                                    imageUrl={product.imageUrl}
+                                    description={product.description}
+                                    delay={0.1 + index * 0.1}
+                                />
+                            ))}
                 </div>
             </motion.div>
 
