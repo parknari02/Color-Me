@@ -25,14 +25,14 @@ export function ChooseMethodStep() {
             <div className="flex gap-3 justify-center flex-wrap mt-6">
                 <Button
                     onClick={handleUpload}
-                    className="bg-gradient-to-r from-primary to-pink-400 hover:opacity-90"
+                    className="cursor-pointer bg-gradient-to-r from-primary to-pink-400 hover:opacity-90"
                 >
                     사진으로 분석하기
                 </Button>
                 <Button
                     onClick={handleSelectColor}
                     variant="outline"
-                    className="border-primary text-primary hover:bg-primary/5"
+                    className="cursor-pointer border-primary text-primary hover:bg-primary/5"
                 >
                     퍼스널 컬러 선택하기
                 </Button>

@@ -25,7 +25,7 @@ export function WelcomeStep() {
             <div className="flex gap-3 justify-center flex-wrap mt-6">
                 <Button
                     onClick={handleStart}
-                    className="bg-gradient-to-r from-primary to-pink-400 hover:opacity-90"
+                    className="cursor-pointer bg-gradient-to-r from-primary to-pink-400 hover:opacity-90"
                 >
                     시작하기
                     <ArrowRight className="w-4 h-4 ml-2" />

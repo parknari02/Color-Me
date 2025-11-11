@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { Product } from '../utils/api';
 
 type Step = 'welcome' | 'choose-method' | 'upload' | 'select-color' | 'analyzing' | 'result' | 'cosmetic-preference' | 'cosmetics' | 'style-preference' | 'fashion-recommendations';
 
@@ -15,6 +16,8 @@ interface AppContextType {
     setStylePreferences: (preferences: { bodyType: string; style: string } | null) => void;
     selectedCosmeticCategory: string;
     setSelectedCosmeticCategory: (category: string) => void;
+    recommendedProducts: Product[];
+    setRecommendedProducts: (products: Product[]) => void;
     getPersonalColorName: (color: string) => string;
 }
 
@@ -27,6 +30,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const [cosmeticPreferences, setCosmeticPreferences] = useState<string>('');
     const [stylePreferences, setStylePreferences] = useState<{ bodyType: string; style: string } | null>(null);
     const [selectedCosmeticCategory, setSelectedCosmeticCategory] = useState<string>('베이스');
+    const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
 
     const getPersonalColorName = (color: string) => {
         const colorNames: Record<string, string> = {
@@ -57,6 +61,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 setStylePreferences,
                 selectedCosmeticCategory,
                 setSelectedCosmeticCategory,
+                recommendedProducts,
+                setRecommendedProducts,
                 getPersonalColorName,
             }}
         >

@@ -1,4 +1,3 @@
-import { motion } from 'motion/react';
 import React from 'react';
 
 interface PersonalColorSelectorProps {
@@ -7,62 +6,59 @@ interface PersonalColorSelectorProps {
 
 const colorCategories = [
   {
-    title: '봄 웜톤',
     colors: [
-      { name: '봄 라이트', value: 'spring-light', gradient: 'from-yellow-200 via-peach-200 to-pink-200' },
-      { name: '봄 브라이트', value: 'spring-bright', gradient: 'from-yellow-400 via-coral-500 to-pink-400' },
+      { name: '봄 라이트', value: 'spring-light', bgColor: 'bg-yellow-50', borderColor: 'border-yellow-300', textColor: 'text-yellow-700' },
+      { name: '봄 브라이트', value: 'spring-bright', bgColor: 'bg-pink-50', borderColor: 'border-pink-400', textColor: 'text-pink-700' },
     ],
   },
   {
-    title: '여름 쿨톤',
     colors: [
-      { name: '여름 라이트', value: 'summer-light', gradient: 'from-blue-200 via-lavender-200 to-pink-200' },
-      { name: '여름 뮤트', value: 'summer-mute', gradient: 'from-slate-400 via-purple-400 to-mauve-400' },
+      { name: '여름 라이트', value: 'summer-light', bgColor: 'bg-blue-50', borderColor: 'border-blue-300', textColor: 'text-blue-700' },
+      { name: '여름 뮤트', value: 'summer-mute', bgColor: 'bg-purple-50', borderColor: 'border-purple-300', textColor: 'text-purple-700' },
     ],
   },
   {
-    title: '가을 웜톤',
     colors: [
-      { name: '가을 뮤트', value: 'autumn-mute', gradient: 'from-amber-500 via-orange-600 to-brown-600' },
-      { name: '가을 딥', value: 'autumn-deep', gradient: 'from-amber-700 via-orange-800 to-red-900' },
+      { name: '가을 뮤트', value: 'autumn-mute', bgColor: 'bg-orange-50', borderColor: 'border-orange-400', textColor: 'text-orange-700' },
+      { name: '가을 딥', value: 'autumn-deep', bgColor: 'bg-amber-50', borderColor: 'border-amber-600', textColor: 'text-amber-800' },
     ],
   },
   {
-    title: '겨울 쿨톤',
     colors: [
-      { name: '겨울 브라이트', value: 'winter-bright', gradient: 'from-blue-500 via-purple-500 to-pink-500' },
-      { name: '겨울 다크', value: 'winter-dark', gradient: 'from-blue-800 via-purple-800 to-pink-800' },
+      { name: '겨울 브라이트', value: 'winter-bright', bgColor: 'bg-cyan-50', borderColor: 'border-cyan-400', textColor: 'text-cyan-700' },
+      { name: '겨울 다크', value: 'winter-dark', bgColor: 'bg-slate-100', borderColor: 'border-slate-400', textColor: 'text-slate-700' },
     ],
   },
 ];
 
 export function PersonalColorSelector({ onSelect }: PersonalColorSelectorProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {colorCategories.map((category, categoryIndex) => (
-        <motion.div
-          key={category.title}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: categoryIndex * 0.1 }}
-          className="space-y-3"
-        >
-          <h4 className="text-muted-foreground">{category.title}</h4>
+        <div key={categoryIndex}>
           <div className="grid grid-cols-2 gap-3">
-            {category.colors.map((color, index) => (
-              <motion.button
+            {category.colors.map((color) => (
+              <button
                 key={color.value}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: categoryIndex * 0.1 + index * 0.05 }}
                 onClick={() => onSelect(color.value)}
-                className={`p-4 rounded-xl bg-gradient-to-br ${color.gradient} hover:scale-105 transition-transform shadow-md`}
+                className={`p-4 rounded-lg border-2 ${color.bgColor} ${color.borderColor} ${color.textColor} transition-all text-center font-medium cursor-pointer hover:border-primary`}
+                style={{
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#fdf2f8';
+                  e.currentTarget.style.borderColor = 'var(--primary)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '';
+                  e.currentTarget.style.borderColor = '';
+                }}
               >
-                <div className="text-white drop-shadow-md">{color.name}</div>
-              </motion.button>
+                {color.name}
+              </button>
             ))}
           </div>
-        </motion.div>
+        </div>
       ))}
     </div>
   );

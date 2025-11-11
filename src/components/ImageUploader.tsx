@@ -59,7 +59,7 @@ export function ImageUploader({ onUpload }: ImageUploaderProps) {
             드래그하거나 클릭하여 이미지 선택
           </p>
         </div>
-        <Button className="bg-gradient-to-r from-primary to-pink-400 hover:opacity-90">
+        <Button className="cursor-pointer bg-gradient-to-r from-primary to-pink-400 hover:opacity-90">
           <Upload className="w-4 h-4 mr-2" />
           파일 선택
         </Button>
