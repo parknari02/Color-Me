@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { ChatMessage } from '../ChatMessage';
 import { CategoryFilter } from '../CategoryFilter';
 import { ProductCard } from '../ProductCard';
 import { Button } from '../common/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { mockCosmetics } from '../../data/mockData';
+import { recommendCosmetics } from '../../utils/api';
 
 export function CosmeticsStep() {
     const {
@@ -18,7 +19,12 @@ export function CosmeticsStep() {
         getPersonalColorName,
         setStep,
         recommendedProducts,
+        setRecommendedProducts,
+        submittedRequest,
     } = useApp();
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     // API로 받은 제품이 있으면 사용, 없으면 mock 데이터 사용
     const hasApiProducts = recommendedProducts.length > 0;
@@ -29,6 +35,51 @@ export function CosmeticsStep() {
     const displayColorName = personalColorClass
         ? getPersonalColorName(personalColorClass)
         : getPersonalColorName(personalColor);
+
+    // 카테고리 표시 이름 매핑
+    const categoryDisplayNames: Record<string, string> = {
+        'lip': '립',
+        'eyes': '아이',
+        'face': '페이스',
+    };
+
+    // 카테고리 선택 시 API 호출
+    const handleCategoryChange = async (category: string) => {
+        setSelectedCosmeticCategory(category);
+
+        if (!personalColor && !personalColorClass) {
+            return;
+        }
+
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            // 추가 요청사항이 있으면 기존 cosmeticPreferences와 합치기
+            let query = cosmeticPreferences || '';
+            if (submittedRequest) {
+                query = query
+                    ? `${query}, ${submittedRequest}`
+                    : submittedRequest;
+            }
+            // query가 비어있으면 빈 문자열로 전달 (API에서 파라미터를 추가하지 않음)
+            query = query.trim() || '';
+
+            // 이미지로 분석받은 경우: personalColorClass (예: "summer", "spring")를 그대로 사용
+            // 수동으로 선택한 경우: personalColor (예: "spring-light")를 API 형식으로 변환
+            const colorForAPI = personalColorClass || personalColor;
+
+            const response = await recommendCosmetics(colorForAPI, query, undefined, undefined, 10, category);
+
+            setRecommendedProducts(response.products);
+        } catch (err) {
+            console.error('화장품 추천 API 호출 실패:', err);
+            setError('화장품 추천을 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
 
     return (
         <>
@@ -60,6 +111,14 @@ export function CosmeticsStep() {
                 transition={{ delay: 0.4 }}
                 className="space-y-4"
             >
+                {hasApiProducts && (
+                    <CategoryFilter
+                        categories={['lip', 'eyes', 'face']}
+                        selectedCategory={selectedCosmeticCategory}
+                        onSelectCategory={handleCategoryChange}
+                        displayNames={categoryDisplayNames}
+                    />
+                )}
                 {!hasApiProducts && (
                     <CategoryFilter
                         categories={['베이스', '아이', '치크', '립']}
@@ -67,37 +126,51 @@ export function CosmeticsStep() {
                         onSelectCategory={setSelectedCosmeticCategory}
                     />
                 )}
-                <div className="grid grid-cols-2 gap-4">
-                    {hasApiProducts
-                        ? recommendedProducts.map((product, index) => (
-                            <ProductCard
-                                key={product.id || index}
-                                name={`${product.name} ${product.option_name || ''}`.trim()}
-                                brand={product.brand}
-                                imageUrl={product.img_url}
-                                description={product.reason || ''}
-                                price={product.price_str}
-                                productUrl={product.product_url}
-                                delay={0.1 + index * 0.1}
-                            />
-                        ))
-                        : mockCosmetics
-                            .filter((product) => product.category === selectedCosmeticCategory)
-                            .map((product, index) => (
+                {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                        {error}
+                    </div>
+                )}
+                {isLoading && (
+                    <div className="flex justify-center items-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                        <span className="ml-2 text-sm text-muted-foreground">추천 제품을 불러오는 중...</span>
+                    </div>
+                )}
+                {!isLoading && (
+                    <div className="grid grid-cols-2 gap-4">
+                        {hasApiProducts
+                            ? recommendedProducts.map((product, index) => (
                                 <ProductCard
-                                    key={index}
-                                    name={product.name}
+                                    key={product.id || index}
+                                    name={`${product.name} ${product.option_name || ''}`.trim()}
                                     brand={product.brand}
-                                    category={product.category}
-                                    imageUrl={product.imageUrl}
-                                    description={product.description}
+                                    imageUrl={product.img_url}
+                                    optionUrl={product.option_url}
+                                    description={product.reason || ''}
+                                    price={product.price_str}
+                                    productUrl={product.product_url}
                                     delay={0.1 + index * 0.1}
                                 />
-                            ))}
-                </div>
+                            ))
+                            : mockCosmetics
+                                .filter((product) => product.category === selectedCosmeticCategory)
+                                .map((product, index) => (
+                                    <ProductCard
+                                        key={index}
+                                        name={product.name}
+                                        brand={product.brand}
+                                        category={product.category}
+                                        imageUrl={product.imageUrl}
+                                        description={product.description}
+                                        delay={0.1 + index * 0.1}
+                                    />
+                                ))}
+                    </div>
+                )}
             </motion.div>
 
-            <motion.div
+            {/* <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.8 }}
@@ -115,7 +188,7 @@ export function CosmeticsStep() {
                     패션 아이템 보기
                     <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-            </div>
+            </div> */}
         </>
     );
 }

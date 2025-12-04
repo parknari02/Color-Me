@@ -5,9 +5,10 @@ interface CategoryFilterProps {
   categories: string[];
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
+  displayNames?: Record<string, string>;
 }
 
-export function CategoryFilter({ categories, selectedCategory, onSelectCategory }: CategoryFilterProps) {
+export function CategoryFilter({ categories, selectedCategory, onSelectCategory, displayNames }: CategoryFilterProps) {
   return (
     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
       {categories.map((category, index) => (
@@ -17,12 +18,12 @@ export function CategoryFilter({ categories, selectedCategory, onSelectCategory 
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.2, delay: index * 0.05 }}
           onClick={() => onSelectCategory(category)}
-          className={`px-4 py-2 rounded-full whitespace-nowrap transition-all ${selectedCategory === category
-              ? 'bg-gradient-to-r from-primary to-pink-400 text-white shadow-md'
-              : 'bg-white border border-primary/30 text-foreground hover:border-primary/60'
+          className={`cursor-pointer px-4 py-2 rounded-full whitespace-nowrap transition-all ${selectedCategory === category
+            ? 'bg-gradient-to-r from-primary to-pink-400 text-white shadow-md'
+            : 'bg-white border border-primary/30 text-foreground hover:border-primary/60'
             }`}
         >
-          {category}
+          {displayNames?.[category] || category}
         </motion.button>
       ))}
     </div>

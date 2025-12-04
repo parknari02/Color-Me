@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChatMessage } from '../ChatMessage';
 import { Button } from '../common/button';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2, Send } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { recommendCosmetics } from '../../utils/api';
 
@@ -13,10 +13,14 @@ export function ResultStep() {
         getPersonalColorName,
         setStep,
         cosmeticPreferences,
-        setRecommendedProducts
+        setRecommendedProducts,
+        submittedRequest,
+        setSubmittedRequest
     } = useApp();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [additionalRequest, setAdditionalRequest] = useState<string>('');
+    const [showInput, setShowInput] = useState(false);
 
     // 퍼스널 컬러 클래스 이름 변환
     const getColorClassName = (colorClass: string | null) => {
@@ -52,13 +56,22 @@ export function ResultStep() {
         setError(null);
 
         try {
-            const query = cosmeticPreferences || '추천해주세요';
+            // 추가 요청사항이 있으면 기존 cosmeticPreferences와 합치기
+            let query = cosmeticPreferences || '';
+            const requestToUse = submittedRequest || additionalRequest.trim();
+            if (requestToUse) {
+                query = query
+                    ? `${query}, ${requestToUse}`
+                    : requestToUse;
+            }
+            // query가 비어있으면 빈 문자열로 전달 (API에서 파라미터를 추가하지 않음)
+            query = query.trim() || '';
 
             // 이미지로 분석받은 경우: personalColorClass (예: "summer", "spring")를 그대로 사용
             // 수동으로 선택한 경우: personalColor (예: "spring-light")를 API 형식으로 변환
             const colorForAPI = personalColorClass || personalColor;
 
-            const response = await recommendCosmetics(colorForAPI, query, undefined, undefined, 10);
+            const response = await recommendCosmetics(colorForAPI, query, undefined, undefined, 10, 'lip');
 
             setRecommendedProducts(response.products);
             setStep('cosmetics');
@@ -68,6 +81,19 @@ export function ResultStep() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleInputSubmit = () => {
+        if (additionalRequest.trim()) {
+            setSubmittedRequest(additionalRequest.trim());
+            setShowInput(false);
+        }
+    };
+
+    const handleEditRequest = () => {
+        setAdditionalRequest(submittedRequest);
+        setSubmittedRequest('');
+        setShowInput(true);
     };
 
     return (
@@ -109,7 +135,71 @@ export function ResultStep() {
             )}
             <ChatMessage type="bot" delay={0.4}>
                 <p>이제 화장품 추천을 받아보실까요? 💄</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                    원하는 제품이나 조건이 있으시면 알려주세요!
+                </p>
             </ChatMessage>
+
+            {!showInput && !submittedRequest && (
+                <div className="mt-4 flex justify-center">
+                    <Button
+                        onClick={() => setShowInput(true)}
+                        variant="outline"
+                        className="cursor-pointer text-sm"
+                    >
+                        추가 요청사항 입력하기
+                    </Button>
+                </div>
+            )}
+
+            {showInput && (
+                <div className="mt-4 space-y-2">
+                    <ChatMessage type="user">
+                        <div className="flex gap-2 items-center">
+                            <input
+                                type="text"
+                                value={additionalRequest}
+                                onChange={(e) => setAdditionalRequest(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleInputSubmit();
+                                    }
+                                }}
+                                placeholder="예: 저렴한 제품, 매트한 질감, 자연스러운 색상 등"
+                                className="flex-1 px-4 py-2 border border-primary/20 rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                autoFocus
+                            />
+                            <Button
+                                onClick={handleInputSubmit}
+                                size="sm"
+                                className="px-4 cursor-pointer"
+                            >
+                                <Send className="w-4 h-4" />
+                            </Button>
+                        </div>
+                    </ChatMessage>
+                </div>
+            )}
+
+            {submittedRequest && (
+                <div className="mt-4">
+                    <ChatMessage type="user">
+                        <p>{submittedRequest}</p>
+                    </ChatMessage>
+                    <div className="mt-2 flex justify-center">
+                        <Button
+                            onClick={handleEditRequest}
+                            variant="outline"
+                            size="sm"
+                            className="text-xs text-muted-foreground cursor-pointer"
+                        >
+                            수정하기
+                        </Button>
+                    </div>
+                </div>
+            )}
+
             {error && (
                 <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
                     {error}

@@ -52,16 +52,21 @@ export async function recommendCosmetics(
     query: string = '',
     budget?: number,
     skinType?: string,
-    limit: number = 10
+    limit: number = 10,
+    category?: string
 ): Promise<SearchResponse> {
     const apiPersonalColor = convertPersonalColorToAPI(personalColor);
 
     // FastAPI의 /recommend는 query parameter로 받음
     const params = new URLSearchParams({
         personal_color: apiPersonalColor,
-        query: query || '추천해주세요',
         limit: limit.toString(),
     });
+
+    // query가 비어있지 않을 때만 추가
+    if (query && query.trim()) {
+        params.append('query', query.trim());
+    }
 
     if (budget) {
         params.append('budget', budget.toString());
@@ -69,6 +74,10 @@ export async function recommendCosmetics(
 
     if (skinType) {
         params.append('skin_type', skinType);
+    }
+
+    if (category) {
+        params.append('category', category);
     }
 
     const response = await fetch(`${BASE_URL}/recommend?${params.toString()}`, {

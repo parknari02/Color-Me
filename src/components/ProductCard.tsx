@@ -12,6 +12,7 @@ interface ProductCardProps {
   price?: string;
   productUrl?: string;
   delay?: number;
+  optionUrl?: string;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -22,6 +23,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   description,
   price,
   productUrl,
+  optionUrl,
   delay = 0,
 }) => {
   const handleClick = () => {
@@ -41,12 +43,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           }`}
         onClick={handleClick}
       >
-        <div className="aspect-square bg-muted relative overflow-hidden">
+        <div className="relative aspect-square bg-muted overflow-hidden">
           <ImageWithFallback
             src={imageUrl}
             alt={name}
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover"
           />
+          {optionUrl && (
+            <div
+              className="absolute rounded-full bg-white shadow-lg p-2 flex items-center justify-center pointer-events-none z-10"
+              style={{ width: 58, height: 58, bottom: 12, right: 12 }}
+            >
+              <img
+                src={optionUrl}
+                alt={`${name} 옵션 이미지`}
+                className="w-full h-full object-cover rounded-full"
+              />
+            </div>
+          )}
         </div>
         <div className="p-4">
           <div className="text-xs text-primary mb-1">{brand}</div>

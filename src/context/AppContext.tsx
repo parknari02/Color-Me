@@ -22,6 +22,8 @@ interface AppContextType {
     setSelectedCosmeticCategory: (category: string) => void;
     recommendedProducts: Product[];
     setRecommendedProducts: (products: Product[]) => void;
+    submittedRequest: string;
+    setSubmittedRequest: (request: string) => void;
     getPersonalColorName: (color: string) => string;
 }
 
@@ -35,8 +37,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
     const [cosmeticPreferences, setCosmeticPreferences] = useState<string>('');
     const [stylePreferences, setStylePreferences] = useState<{ bodyType: string; style: string } | null>(null);
-    const [selectedCosmeticCategory, setSelectedCosmeticCategory] = useState<string>('베이스');
+    const [selectedCosmeticCategory, setSelectedCosmeticCategory] = useState<string>('lip');
     const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
+    const [submittedRequest, setSubmittedRequest] = useState<string>('');
 
     const getPersonalColorName = (color: string) => {
         const colorNames: Record<string, string> = {
@@ -77,6 +80,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 setSelectedCosmeticCategory,
                 recommendedProducts,
                 setRecommendedProducts,
+                submittedRequest,
+                setSubmittedRequest,
                 getPersonalColorName,
             }}
         >
